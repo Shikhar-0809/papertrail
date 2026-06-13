@@ -1,0 +1,47 @@
+# Environment and secrets — NEVER commit
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database — contains exam data and keys
+*.db
+*.db-shm
+*.db-wal
+
+# Uploads — contains submitted photos
+/tmp/examshield_uploads/
+
+# Node
+node_modules/
+frontend/build/
+frontend/.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+
+# Demo artifacts — generated locally, not in repo
+demo/sample_papers/*.pdf
+demo/test_photos/*.jpg
+demo/test_photos/*.png
+
+# Bandit and safety reports
+bandit_report.txt
+safety_report.txt

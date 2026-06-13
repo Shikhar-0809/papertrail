@@ -1,0 +1,63 @@
+# ExamShield — Cursor Project Rules
+
+You are building ExamShield: a cryptographic exam paper distribution system with forensic leak tracing. This is a real submission for FAR AWAY 2026 hackathon. The code must be production-grade in architecture even if MVP in scope.
+
+## MANDATORY: Read Before Generating Any File
+
+Before generating any code, read the relevant documentation:
+
+- **Always read**: `ARCHITECTURE.md` — understand module boundaries before touching any file
+- **Always read**: `CODING_STANDARDS.md` — every function must follow these patterns exactly
+- **Always read**: `SECURITY.md` — check every line you generate against these rules
+- **When working on watermark/**: Read `WATERMARK_SPEC.md` completely before writing one line
+- **When working on routes/ or frontend**: Read `API_CONTRACTS.md` completely
+- **When adding a bug or limitation**: Add it to `BUGS.md`, do not silently work around it
+
+## Non-Negotiable Rules
+
+1. **No hardcoded secrets**. All secrets from `os.environ`. App fails loudly if missing.
+2. **No SQL string formatting**. Parameterized queries only, always.
+3. **No bare `except:`**. Always catch specific exception types.
+4. **No `print()`** in backend production code. Use `logging`.
+5. **No stack traces in HTTP responses**. Generic error message, full trace in logs only.
+6. **No business logic in route functions**. Routes call one service function, return response.
+7. **No database access from route functions**. Only from service functions.
+8. **No AES key values in any log statement**. Log the event (exam_id, center_id), never the key.
+9. **Type hints mandatory** on every function parameter and return type.
+10. **Pydantic models** for every API request body and response body.
+
+## Module Boundaries (Enforce Strictly)
+
+```
+watermark/ and crypto/  → pure computation only, no I/O, no HTTP, no DB
+services/               → business logic + DB access, no HTTP
+routes/                 → HTTP only, calls one service, returns response
+utils/                  → helpers only, no business logic
+```
+
+Imports must only flow downward. Routes import services. Services import watermark/crypto. Never the reverse.
+
+## When You Are Unsure
+
+If a requirement in the prompt conflicts with ARCHITECTURE.md, SECURITY.md, or CODING_STANDARDS.md — the .md file wins. Ask for clarification rather than making an assumption that violates these standards.
+
+If a feature would require more than 40 lines in a function, split it into sub-functions.
+
+If a file would exceed 250 lines, split it into two files.
+
+## What "Done" Means
+
+A function is done when:
+- It has complete type hints
+- It handles error cases explicitly (not with bare except)
+- It has at least one test case in the corresponding test file
+- It follows the logging pattern from CODING_STANDARDS.md
+- It passes the security grep checks in SECURITY_AUDIT.md
+
+## Tech Stack (Do Not Substitute)
+
+Backend: Python 3.11, FastAPI, aiosqlite, Pydantic v2, cryptography library, opencv-python-headless, numpy, fpdf2, python-magic, slowapi
+
+Frontend: React 18, Tailwind CSS, Recharts (charts only), no other UI libraries unless specified
+
+Do not introduce new dependencies without noting them in requirements.txt and explaining why in the commit message.
