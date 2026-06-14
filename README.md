@@ -39,7 +39,7 @@ pipeline.
 
 ```bash
 # 1. Clone
-git clone <repo-url> examshield && cd examshield
+git clone <git clone https://github.com/Shikhar-0809/ExamShield.git> examshield && cd examshield
 
 # 2. Backend dependencies (Python 3.11+)
 pip install -r requirements.txt
