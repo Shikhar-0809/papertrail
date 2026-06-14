@@ -229,10 +229,22 @@ done
 # Check: curl http://localhost:8000/api/audit/alerts | grep R003
 ```
 
-**M2 Audit Result**: PASS / FAIL  
-**Date**: ___________  
-**Findings**:  
-**Actions taken**:  
+**M2 Audit Result**: PASS
+**Date**: 2026-06-14
+**Findings**:
+  1. JSONResponse positional argument bug — all error returns in vault_routes.py
+     and forensics_routes.py used JSONResponse(status_code, content) positional
+     form, passing status code as content and dict as status_code. Caused 500
+     on all error paths. Fixed: 6 calls converted to keyword arguments.
+  2. Automated checks (secrets/SQL/bare-except/print/stack-traces): all clean.
+     4 secret-pattern hits confirmed false positives (config var names +
+     stdlib secrets module import).
+  3. Path traversal attempt (/../../etc/passwd): blocked by Starlette URL
+     normalisation before reaching route. Returns 404, not our custom 400.
+     Acceptable for MVP — URL normalisation is a valid first defence.
+     S-009 regex validation fires correctly for well-formed but invalid IDs.
+**Actions taken**: JSONResponse keyword argument fix applied before closing audit.
+                   All other findings require no code change.
 
 ---
 

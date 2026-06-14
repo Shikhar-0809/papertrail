@@ -164,3 +164,20 @@ These are intentional MVP tradeoffs. Attempting to "fix" them may introduce wors
 **Fix Applied**:
 **Status**: Open / Fixed in commit [hash]
 ```
+
+---
+
+## BUGS-011 — Path Traversal Returns 404 Instead of Custom 400
+
+**Severity**: LOW
+**Component**: `backend/routes/vault_routes.py`
+**Description**: A path traversal attempt like `/api/vault/release/{id}/../../etc/passwd`
+  is normalised by Starlette's URL routing before reaching the route handler.
+  The normalised path `/etc/passwd` matches no route, returning FastAPI's default
+  `{"detail": "Not Found"}` 404 rather than our custom `VALIDATION_ERROR` 400.
+  S-009 regex validation fires correctly for well-formed center_id values.
+**Production Fix**: Add a middleware-level path sanitisation check, or accept
+  Starlette's normalisation as sufficient (it is — the traversal is blocked).
+**MVP Workaround**: Traversal is blocked. Error format is non-standard but
+  harmless. Acceptable for MVP.
+**Status**: Open — acceptable for MVP, document only.
