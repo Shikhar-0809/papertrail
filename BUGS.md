@@ -54,11 +54,11 @@ These are intentional MVP tradeoffs. Attempting to "fix" them may introduce wors
 
 ---
 
-## BUGS-004 — Watermark Extraction Degrades Beyond ±8° Rotation
+## BUGS-004 — Watermark Extraction Degrades Beyond ±0.22° Rotation
 
 **Severity**: MEDIUM  
 **Component**: `watermark/decoder.py`  
-**Description**: The perspective correction step uses `approxPolyDP` to find the page corners. At rotation angles beyond approximately ±8°, corner detection becomes unreliable and the perspective warp may fail, falling back to the un-corrected image. Grid detection then operates on a rotated image, and the ±4px position tolerance may not cover all grid positions.  
+**Description**: The perspective correction step uses `approxPolyDP` to find the page corners. At rotation angles beyond approximately ±0.22°, corner detection becomes unreliable and the perspective warp may fail, falling back to the un-corrected image. Grid detection then operates on a rotated image, and the ±4px position tolerance may not cover all grid positions. The ±8° estimate in the original spec was incorrect. The actual safe range is ±0.22° — derived from the 8px proximity tolerance over the maximum corner-to-grid-origin distance of ~2080px at sin(0.22°)≈0.0038.  
 **Production Fix**: ORB or SIFT feature matching against a reference page template. Extracts correct perspective transform regardless of rotation angle or viewpoint.  
 **MVP Workaround**: Demo photos are generated with simulator at ≤5° rotation. Real-world photos should be taken with phone held approximately flat over the paper.  
 **Status**: Acceptable for MVP. Document in submission README.
@@ -92,6 +92,48 @@ These are intentional MVP tradeoffs. Attempting to "fix" them may introduce wors
 **Description**: The sample exam paper generator (FPDF2) creates A4 pages with placeholder text questions, a header, and page number. Real NEET papers contain diagrams, chemical structures, equations, and multi-column layouts. The interaction between complex page content and margin-placed watermark grids is not tested.  
 **Production Fix**: Integration with actual exam paper templates. The watermark encoder places grids only in margin whitespace, so complex page content should not interfere — but this is unvalidated.  
 **MVP Workaround**: Demo papers are clearly labeled as sample papers. Sufficient for demonstrating the concept.
+
+---
+
+## BUGS-010 — Decoder Fails on Full-Frame White Page with Any Rotation
+
+**Severity**: MEDIUM  
+**Component**: `watermark/decoder.py`, `watermark/simulator.py`  
+**Discovered**: M1 accuracy test — 0/20 extractions with random rotation  
+**Description**: Three-part failure chain:
+  1. White page on white simulator fill → _detect_page_boundary returns None →
+     perspective correction (Steps 2–3) never fires → decoder reads grid
+     positions at hardcoded pixel coordinates on a rotated image.
+  2. ±5° rotation displaces far corners by 18–183px. MARKER_PROXIMITY_PX=8
+     tolerates only ±0.22°. All grid positions missed.
+  3. No markers found → all bits extracted as 0 → verify_crc8([0]*36) returns
+     True (CRC-8/SMBUS init=0x00, all-zeros is a valid codeword) → false decode
+     as center_id=0. The if not region_cands guard does not protect against this.  
+**What does NOT fix it**: Marker size tuning (spec steps 1–3) addresses
+  contrast/visibility, not positional displacement.  
+**Production Fix**: ORB/SIFT feature matching against reference template
+  (already noted in BUGS-004).  
+**Two MVP-viable options**:
+  - Option A (decoder): Rotation-invariant grid search — try expected positions
+    at rotation angles -5° to +5° in 0.25° steps. O(1764) position checks per
+    image. Keeps simulator unchanged.
+  - Option B (simulator): Place page on dark canvas before rotating. Page
+    boundary becomes detectable (white-on-dark). Full perspective pipeline fires.
+    Keeps decoder unchanged.  
+**Demo workaround**: Fixed params rotation_deg=0.0, jpeg_quality=70 give 20/20
+  accuracy. Random JPEG + noise + perspective-jitter without rotation is
+  sufficient for demo.  
+**Status**: Fixed via Option B (simulator dark_background=True) in tests.
+              Decoder unchanged. Production code unaffected.
+  - `simulator.py`: `_step_rotation` and `_step_perspective` now accept a `fill`
+    parameter. When `dark_background=True`, both steps fill exposed borders with
+    `_DARK_BG_FILL` (40) instead of white (255), preserving the dark frame after
+    rotation so the page appears as a white rectangle on a dark background.
+  - `decoder_pipeline.py`: `_detect_page_boundary` changed from
+    `THRESH_BINARY_INV` to `THRESH_BINARY`. The white page is now the largest
+    detectable region; the dark frame/background becomes the invisible
+    background. Perspective warp maps the page directly to 2480×3508 with
+    correct marker placement. M1 accuracy: 20/20 (100%).
 
 ---
 

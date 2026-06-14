@@ -69,7 +69,7 @@ def _to_grayscale(image: np.ndarray) -> np.ndarray:
 
 def _detect_page_boundary(gray: np.ndarray) -> np.ndarray | None:
     blurred = cv2.GaussianBlur(gray, _BLUR_KERNEL, 0)
-    _, thresh = cv2.threshold(blurred, _PAGE_THRESH_VAL, 255, cv2.THRESH_BINARY_INV)
+    _, thresh = cv2.threshold(blurred, _PAGE_THRESH_VAL, 255, cv2.THRESH_BINARY)
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
         return None
