@@ -123,17 +123,10 @@ These are intentional MVP tradeoffs. Attempting to "fix" them may introduce wors
 **Demo workaround**: Fixed params rotation_deg=0.0, jpeg_quality=70 give 20/20
   accuracy. Random JPEG + noise + perspective-jitter without rotation is
   sufficient for demo.  
-**Status**: Fixed via Option B (simulator dark_background=True) in tests.
-              Decoder unchanged. Production code unaffected.
-  - `simulator.py`: `_step_rotation` and `_step_perspective` now accept a `fill`
-    parameter. When `dark_background=True`, both steps fill exposed borders with
-    `_DARK_BG_FILL` (40) instead of white (255), preserving the dark frame after
-    rotation so the page appears as a white rectangle on a dark background.
-  - `decoder_pipeline.py`: `_detect_page_boundary` changed from
-    `THRESH_BINARY_INV` to `THRESH_BINARY`. The white page is now the largest
-    detectable region; the dark frame/background becomes the invisible
-    background. Perspective warp maps the page directly to 2480×3508 with
-    correct marker placement. M1 accuracy: 20/20 (100%).
+**Status**: Fixed in commit ad9e7db. _step_rotation now uses borderValue=_DARK_BG_FILL
+            instead of white (255). Dark frame stays intact after rotation.
+            Perspective correction fires correctly. 19/20 accuracy (95%).
+            All M1 tests pass (69/69).
 
 ---
 

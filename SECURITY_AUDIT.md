@@ -52,10 +52,18 @@ python -m pytest tests/test_watermark_accuracy.py -v -s
 # Record result in WATERMARK_SPEC.md "Tuned Parameters" section
 ```
 
-**M1 Audit Result**: PASS / FAIL  
-**Date**: ___________  
-**Findings**:  
-**Actions taken**:  
+**M1 Audit Result**: PASS
+**Date**: 2026-06-14
+**Findings**:
+  - BUGS-010: Simulator rotation border fill caused 0% extraction accuracy.
+    Root cause: white borderValue in _step_rotation destroyed dark canvas
+    frame, giving page boundary detector 8+ corners instead of 4.
+    Fixed in ad9e7db (one line).
+  - BUGS-004: Corrected stated rotation limit from ±8° to ±0.22° in BUGS.md.
+  - decoder.py exceeded 250-line limit (was 348 lines).
+    Refactored into decoder.py + decoder_pipeline.py + decoder_result.py.
+  - All-zeros CRC false positive closed with _ALL_ZEROS_SENTINEL guard.
+**Actions taken**: All findings resolved before M2. See commits for details.
 
 ---
 

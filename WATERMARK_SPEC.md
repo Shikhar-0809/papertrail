@@ -281,10 +281,15 @@ Before recording the demo, run `tests/test_watermark_accuracy.py`:
 ## Tuned Parameters (Update After M1 Testing)
 
 ```
-# Fill these in after running test_watermark_accuracy.py
-Final marker size    : 6×6 px (or updated value)
-Final marker color   : RGB(180,180,180) (or updated value)
-Final grid spacing   : 20px (or updated value)
-Achieved accuracy    : __/20 runs successful
-Date tuned           : 
+Final marker size    : 6×6 px (unchanged)
+Final marker color   : RGB(180,180,180) (unchanged)
+Final grid spacing   : 20px (unchanged)
+Achieved accuracy    : 19/20 (95%) — clears 85% gate
+Date tuned           : 2026-06-14
+Notes                : Default parameters sufficient. Root cause of earlier
+                       0/20 failure was simulator geometry (white rotation
+                       border destroying dark frame), not marker visibility.
+                       Fixed in commit ad9e7db — borderValue=_DARK_BG_FILL
+                       in _step_rotation. No marker parameter changes needed.
+                       See BUGS-010 in BUGS.md for full diagnosis.
 ```
