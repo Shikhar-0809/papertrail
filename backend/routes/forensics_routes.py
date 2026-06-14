@@ -2,10 +2,11 @@
 
 import logging
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from backend.ratelimit import FORENSICS_ANALYZE_RATE, limiter
 from backend.services.forensics_service import (
     FileTooLargeError,
     UnsupportedMimeError,
@@ -24,7 +25,8 @@ class AnalyzeResponse(BaseModel):
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
-async def analyze(file: UploadFile = File(...)) -> AnalyzeResponse:
+@limiter.limit(FORENSICS_ANALYZE_RATE)
+async def analyze(request: Request, file: UploadFile = File(...)) -> AnalyzeResponse:
     try:
         report_id = await start_analysis(file)
         return AnalyzeResponse(report_id=report_id, status="processing")
