@@ -292,10 +292,16 @@ Open browser DevTools → Network tab, then:
 | Open DevTools → Application → Storage | localStorage and sessionStorage are empty | |
 | Open DevTools → Console | No sensitive values logged to console | |
 
-**M3 Audit Result**: PASS / FAIL  
-**Date**: ___________  
-**Findings**:  
-**Actions taken**:  
+**M3 Audit Result**: PASS
+**Date**: 2026-06-14
+**Findings**:
+  1. "Invalid Date" in AuditTrail, Dashboard, ForensicsLab — ISO timestamp
+     strings not parsed correctly. Fixed with formatDate() helper in all
+     three components.
+  2. All automated checks clean: no localStorage, no dangerouslySetInnerHTML,
+     no hardcoded URLs outside api.js, no fetch() in components.
+**Actions taken**: formatDate helper added to AuditTrail.jsx, Dashboard.jsx,
+                   ForensicsLab.jsx before closing M3.
 
 ---
 
