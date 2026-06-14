@@ -68,31 +68,19 @@ creates no duplicate data.
 
 ## Running the Demo
 
+Running the Demo
 Generate a realistic "leaked paper" photo and self-verify the watermark:
 
-```bash
 python backend/utils/generate_demo_photo.py
-```
 
-This builds a watermarked A4 page for center **221**, simulates the
-print → photograph → WhatsApp degradation pipeline, saves
-`demo/test_photos/leaked_center_221.jpg`, then immediately re-decodes the saved
-file and exits non-zero if extraction fails. Three demo flows, all visible in
-the React UI:
+This builds a watermarked A4 page for center 221, simulates the print → photograph → WhatsApp degradation pipeline, saves demo/test_photos/leaked_center_221.jpg, then immediately re-decodes the saved file and exits non-zero if extraction fails. Three demo flows, all visible in the React UI:
 
-1. **Paper generation** — In *Exam Manager*, open the seeded *NEET-UG 2026*
-   exam and use *Generate Papers* (already done by the seed). Each center gets a
-   watermarked page that is AES-256-GCM encrypted; the key and ciphertext path
-   are stored in the vault.
-2. **Time-locked key request** — Request a key for a center before the release
-   time (the seeded exam releases tomorrow at 08:30 IST). The vault returns
-   **403 KEY_NOT_YET_AVAILABLE** and an **R001 CRITICAL** anomaly fires,
-   appearing on the Dashboard alert banner and in the Audit Trail within
-   seconds.
-3. **Forensic identification** — In *Forensics Lab*, upload
-   `demo/test_photos/leaked_center_221.jpg`. ExamShield extracts the watermark
-   and reports **center NEET-HAZ-221 identified** with a confidence score and a
-   `forensic_match` CRITICAL audit event.
+Paper generation — In Exam Manager, open the seeded NEET-UG 2026 exam and use Generate Papers (already done by the seed). Each center gets a watermarked page that is AES-256-GCM encrypted; the key and ciphertext path are stored in the vault.
+
+Time-locked key request — Request a key for a center before the release time (the seeded exam releases tomorrow at 08:30 IST). The vault returns 403 KEY_NOT_YET_AVAILABLE and an R001 CRITICAL anomaly fires, appearing on the Dashboard alert banner and in the Audit Trail within seconds.
+
+Forensic identification — In Forensics Lab, upload demo/test_photos/leaked_center_221.jpg. ExamShield extracts the watermark and reports center NEET-HAZ-221 identified with a confidence score and a forensic_match CRITICAL audit event.
+
 Note: The demo uses a programmatically generated sample exam page (placeholder questions, no real content). The watermarking and forensic identification pipeline works identically on real exam papers — see BUGS-007 in BUGS.md for details.
 ## Running Tests
 
