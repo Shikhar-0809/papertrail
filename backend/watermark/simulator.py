@@ -70,7 +70,7 @@ def _step_rotation(image: np.ndarray, angle: float, fill: int = 255) -> np.ndarr
     return cv2.warpAffine(
         image, M, (w, h),
         borderMode=cv2.BORDER_CONSTANT,
-        borderValue=fill,
+        borderValue=_DARK_BG_FILL,
     )
 
 
