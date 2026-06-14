@@ -16,6 +16,7 @@ build/
 htmlcov/
 
 # Database — contains exam data and keys
+examshield.db
 *.db
 *.db-shm
 *.db-wal

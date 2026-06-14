@@ -181,3 +181,19 @@ These are intentional MVP tradeoffs. Attempting to "fix" them may introduce wors
 **MVP Workaround**: Traversal is blocked. Error format is non-standard but
   harmless. Acceptable for MVP.
 **Status**: Open — acceptable for MVP, document only.
+
+---
+
+## BUGS-010 — Center Primary Keys Are Not UUIDs
+
+**Severity**: LOW  
+**Component**: `backend/utils/seed.py`, `services/forensics_service.py`  
+**Description**: Seeded exam centers use string integers ("001"–"010", "221") as
+primary keys rather than UUIDs. This is because forensics_service resolves a decoded
+watermark integer by matching exam_centers.id == str(center_id). A proper fix would
+add a separate watermark_id integer column to the exam_centers table and look up by
+that field, leaving the UUID primary key intact.  
+**Production Fix**: Add watermark_id column, update forensics_service lookup query.  
+**MVP Workaround**: Functional for demo. String IDs are consistent throughout.  
+**Do Not Fix By**: Switching to UUIDs without also updating forensics_service — that
+breaks the forensic identification end-to-end.
