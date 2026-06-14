@@ -130,13 +130,41 @@ These are intentional MVP tradeoffs. Attempting to "fix" them may introduce wors
 
 ---
 
-## BUGS-008 — Layer 2 Digital Watermark Not Implemented
+## BUGS-008 — Layer 2 Digital Watermark — Partial Implementation
 
 **Severity**: LOW  
-**Component**: N/A (planned feature)  
-**Description**: The architecture planned a DWT-DCT frequency-domain watermark for tracing digital PDF leaks (where the PDF is forwarded digitally rather than printed and photographed). This was scoped out of the MVP because the primary threat model is print→photo leaks.  
-**Production Fix**: Implement using `invisible-watermark` library (PyPI). Embed center_id in DCT coefficients. Survives screenshots and format conversion but not print→photo.  
-**MVP Workaround**: Layer 1 dot pattern handles the print→photo case which is the real-world threat.
+**Component**: `backend/watermark/dct_encoder.py`, `backend/watermark/dct_decoder.py`  
+**Description**: A manual 8×8 block QIM (Quantization Index Modulation) DCT
+watermark was implemented in an experimental branch using `scipy.fft.dctn`.
+The center_id is embedded in mid-frequency coefficients (positions [4,1] vs
+[1,4]) across 64 blocks in the center page region (x:600–1800, y:800–2700),
+with a 20-bit payload (4-bit magic prefix + 16-bit center_id) and majority
+vote extraction.
+
+**What works**:
+- Survives JPEG compression at Q=70 on canonical images
+- Survives corner blackout (all 4 dot grid corners blacked out) on canonical images
+- Survives perspective warp alone when perspective correction is applied first
+- Does not interfere with Layer 1 dot grid extraction
+
+**What fails**:
+- Full print→photo→WhatsApp simulation pipeline: Gaussian noise (σ=8) +
+  rotation + perspective warp + JPEG combined reduce QIM coefficient margins
+  from 25 to ~3, below recovery threshold. Tested at delta=25–100, all fail.
+
+**Scope of each layer**:
+- Layer 1 (dot grid): traces physical leaks — paper printed, photographed,
+  shared via WhatsApp. Survives full degradation pipeline at ≥85% accuracy.
+- Layer 2 (DCT): traces digital leaks — PDF forwarded digitally without
+  printing. Survives screenshot and format conversion but not print→photo.
+  Together the two layers cover all leak threat vectors in production.
+
+**Production Fix**: Reed-Solomon error correction on the 20-bit DCT payload,
+or spread-spectrum embedding instead of QIM.
+
+**Do Not Fix By**: Increasing delta — tested up to 100, does not help.
+
+**Status**: Experimental branch only. Not merged into main repo.
 
 ---
 
