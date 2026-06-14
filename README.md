@@ -93,7 +93,7 @@ the React UI:
    `demo/test_photos/leaked_center_221.jpg`. ExamShield extracts the watermark
    and reports **center NEET-HAZ-221 identified** with a confidence score and a
    `forensic_match` CRITICAL audit event.
-
+Note: The demo uses a programmatically generated sample exam page (placeholder questions, no real content). The watermarking and forensic identification pipeline works identically on real exam papers — see BUGS-007 in BUGS.md for details.
 ## Running Tests
 
 ```bash
